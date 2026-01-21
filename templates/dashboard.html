@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>ZONA VERMELHA: COMANDO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #09090b; color: #e4e4e7; font-family: 'Courier New', Courier, monospace; }
+        .neon-red { box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
+        dialog::backdrop { background: rgba(0, 0, 0, 0.9); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; }
+        ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+    </style>
+</head>
+<body class="p-4 md:p-6 min-h-screen selection:bg-red-900 selection:text-white pb-20">
+
+    <header class="max-w-7xl mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+        
+        <div class="lg:col-span-3 flex flex-col justify-between bg-zinc-950 border-l-4 border-red-600 p-6 shadow-lg">
+            <div>
+                <h1 class="text-3xl font-black text-red-600 italic tracking-tighter flex items-center gap-2">
+                    <i data-lucide="radiation" class="animate-pulse"></i> ZONA VERMELHA
+                </h1>
+                <p class="text-zinc-600 text-[10px] tracking-[0.3em] uppercase mt-1">TEMPORADA I</p>
+            </div>
+            <button onclick="document.getElementById('modal-add').showModal()" 
+                    class="mt-4 w-full bg-red-700 hover:bg-red-600 text-black font-black px-4 py-3 uppercase tracking-widest transition-all text-xs flex items-center justify-center gap-2">
+                <i data-lucide="user-plus" width="16"></i> Alistar
+            </button>
+        </div>
+
+        <div class="lg:col-span-2 bg-zinc-900 border border-zinc-800 p-3 flex flex-col justify-center gap-2">
+            <div>
+                <h3 class="text-[9px] font-black text-zinc-500 uppercase flex items-center gap-1 mb-1">
+                    <i data-lucide="map-pin" width="10"></i> Local
+                </h3>
+                <input type="text" name="location" value="{{ gamestate.location }}" 
+                       hx-post="/gamestate/update" hx-trigger="keyup changed delay:500ms"
+                       class="bg-zinc-950 border border-zinc-700 text-white px-2 py-1 font-bold uppercase text-xs w-full focus:border-red-600 outline-none">
+            </div>
+            <div>
+                <h3 class="text-[9px] font-black text-zinc-500 uppercase flex items-center gap-1 mb-1">
+                    <i data-lucide="clock" width="10"></i> Hora
+                </h3>
+                <input type="time" name="time" value="{{ gamestate.time }}" 
+                       hx-post="/gamestate/update" hx-trigger="change"
+                       class="bg-zinc-950 border border-zinc-700 text-white px-2 py-1 font-mono font-bold text-xs w-full focus:border-red-600 outline-none">
+            </div>
+        </div>
+
+        <div class="lg:col-span-3">
+            {% include 'partials/dm_dice.html' %}
+        </div>
+
+        <div class="lg:col-span-2 bg-zinc-900 border border-zinc-800 p-3 flex flex-col h-full">
+            <h3 class="text-[10px] font-black text-zinc-500 uppercase mb-2 flex items-center gap-2">
+                <i data-lucide="file-text" width="12"></i> Diário de Campo
+            </h3>
+            <textarea name="notes" 
+                      hx-post="/gamestate/update" hx-trigger="keyup changed delay:500ms"
+                      placeholder="Log tático..."
+                      class="flex-1 bg-zinc-950 border border-zinc-700 text-zinc-300 p-2 text-xs font-mono resize-none focus:border-red-600 outline-none custom-scroll">{{ gamestate.notes }}</textarea>
+        </div>
+
+        <div class="lg:col-span-2">
+            {% include 'partials/doom_clock.html' %}
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="player-grid">
+        {% for player in players %}
+            {% include 'partials/player_card.html' %}
+        {% endfor %}
+    </main>
+
+    <dialog id="modal-add" class="bg-zinc-900 border border-red-600 text-zinc-100 p-0 max-w-2xl w-full">
+        <form action="/add" method="POST" class="p-8 relative" id="form-create">
+            <button type="button" onclick="this.closest('dialog').close()" class="absolute top-4 right-4 text-zinc-500 hover:text-red-500">X</button>
+            <h2 class="text-2xl font-black text-red-600 mb-6 uppercase border-b border-zinc-800 pb-2">Novo Registro</h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <input required name="name" placeholder="NOME DO SUJEITO" class="bg-zinc-950 border border-zinc-700 p-3 focus:border-red-600 outline-none uppercase font-bold text-white tracking-widest">
+                <input required name="age" type="number" max="35" placeholder="IDADE" class="bg-zinc-950 border border-zinc-700 p-3 focus:border-red-600 outline-none text-white font-mono">
+            </div>
+
+            <div class="mb-6 border border-zinc-800 p-4 bg-zinc-950/50 relative">
+                <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-2">
+                    <p class="text-xs font-black text-zinc-500 uppercase">Distribuição Base (Max 4/attr)</p>
+                    <span id="points-display" class="text-sm font-black text-red-600">0 / 10</span>
+                </div>
+                <div class="grid grid-cols-5 gap-2 text-center">
+                    {% for attr in ['vig', 'agi', 'int', 'per', 'pre'] %}
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-zinc-400 mb-1">{{attr}}</label>
+                        <input type="number" name="{{attr}}" value="2" min="0" max="4" 
+                               class="attr-input w-full bg-zinc-900 border border-zinc-700 focus:border-red-500 text-center p-2 font-bold text-xl text-white outline-none"
+                               oninput="updatePoints()">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="points-warning" class="text-[10px] text-red-500 font-bold mt-2 hidden text-center uppercase">
+                    LIMITE DE 10 PONTOS EXCEDIDO.
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-xs font-black text-zinc-500 uppercase">Especializações</p>
+                    <span id="specs-count" class="text-xs font-bold text-zinc-500">0 / 3</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 h-40 overflow-y-auto pr-2 custom-scroll">
+                    {% for id, spec in specs.items() %}
+                    <label class="group relative flex items-center gap-3 text-xs border border-zinc-800 p-3 cursor-pointer hover:bg-zinc-800 transition select-none">
+                        <input type="checkbox" name="specs" value="{{id}}" class="spec-check accent-red-600 w-4 h-4" onchange="updateSpecs(this)">
+                        <div class="flex-1">
+                            <span class="font-bold uppercase block text-zinc-300 group-hover:text-white">{{spec.name}}</span>
+                            <div class="flex gap-2 mt-1 opacity-60 text-[9px] font-mono">
+                                {% for k,v in spec.bonus.items() %}
+                                    <span class="{{ 'text-green-400' if v > 0 else 'text-red-400' }}">
+                                        {{k|upper}} {{'+' if v>0 else ''}}{{v}}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" id="btn-submit" class="w-full bg-red-700 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed py-4 font-black uppercase tracking-[0.2em] transition-all text-black text-sm">
+                Confirmar Alistamento
+            </button>
+        </form>
+    </dialog>
+
+    <script>
+        lucide.createIcons();
+        document.body.addEventListener('htmx:afterSwap', () => lucide.createIcons());
+        function updatePoints() {
+            const inputs = document.querySelectorAll('.attr-input');
+            let sum = 0; inputs.forEach(i => sum += parseInt(i.value || 0));
+            const display = document.getElementById('points-display');
+            const warning = document.getElementById('points-warning');
+            const btn = document.getElementById('btn-submit');
+            display.innerText = `${sum} / 10`;
+            if (sum > 10) {
+                display.classList.add('text-red-500'); display.classList.remove('text-green-500');
+                warning.classList.remove('hidden'); btn.disabled = true;
+            } else {
+                display.classList.remove('text-red-500'); display.classList.add('text-green-500');
+                warning.classList.add('hidden'); checkSubmit();
+            }
+        }
+        function updateSpecs(checkbox) {
+            const checks = document.querySelectorAll('.spec-check:checked');
+            const countDisplay = document.getElementById('specs-count');
+            countDisplay.innerText = `${checks.length} / 3`;
+            if (checks.length > 3) {
+                checkbox.checked = false; alert("MÁXIMO DE 3 ESPECIALIZAÇÕES.");
+                countDisplay.innerText = `3 / 3`;
+            }
+            checkSubmit();
+        }
+        function checkSubmit() {
+            const inputs = document.querySelectorAll('.attr-input');
+            let sum = 0; inputs.forEach(i => sum += parseInt(i.value || 0));
+            const checks = document.querySelectorAll('.spec-check:checked');
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = !(sum <= 10 && checks.length === 3);
+        }
+        updatePoints();
+    </script>
+</body>
+</html>
