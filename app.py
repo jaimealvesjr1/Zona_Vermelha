@@ -5,8 +5,10 @@ import random
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
-DATA_FILE = 'players.json'
-GAME_FILE = 'gamestate.json' # <--- NOVO ARQUIVO DE ESTADO
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DATA_FILE = os.path.join(BASE_DIR, 'players.json')
+GAME_FILE = os.path.join(BASE_DIR, 'gamestate.json')
 
 # --- CONFIGURAÇÃO ---
 SPECIALIZATIONS = {
