@@ -116,9 +116,9 @@
             
             <div class="space-y-1 mb-3">
                 {% for item in player.inventory %}
-                <div class="flex items-center justify-between bg-zinc-950 p-1.5 border border-zinc-800 group hover:border-zinc-700 transition">
+                <div class="flex items-start justify-between bg-zinc-950 p-1.5 border border-zinc-800 group hover:border-zinc-700 transition">
                     
-                    <div class="flex flex-col mr-2">
+                    <div class="flex flex-col mr-2 mt-0.5">
                         <button hx-post="{{ url_for('reorder_item', pid=player.id, item_id=item.id, direction='up') }}" hx-target="#card-{{player.id}}" hx-swap="outerHTML"
                                 class="text-zinc-600 hover:text-white disabled:opacity-20 p-1" {{ 'disabled' if loop.first }}>
                             <i data-lucide="chevron-up" width="10"></i>
@@ -129,12 +129,12 @@
                         </button>
                     </div>
 
-                    <div class="flex-1 flex items-center gap-2 min-w-0">
-                        <span class="text-[10px] font-mono text-zinc-500 select-none">{{ loop.index }}.</span>
-                        <span class="text-[10px] uppercase font-bold text-zinc-300 truncate">{{ item.name }}</span>
+                    <div class="flex-1 flex items-start gap-2 min-w-0 py-1">
+                        <span class="text-[10px] font-mono text-zinc-500 select-none mt-0.5">{{ loop.index }}.</span>
+                        <span class="text-[10px] uppercase font-bold text-zinc-300 whitespace-normal break-words leading-tight">{{ item.name }}</span>
                     </div>
                     
-                    <div class="flex items-center gap-2 ml-2">
+                    <div class="flex items-center gap-2 ml-2 mt-0.5">
                         <div class="flex items-center bg-zinc-900 border border-zinc-800">
                             <button hx-post="{{ url_for('update_item', pid=player.id, item_id=item.id, action='dec') }}" hx-target="#card-{{player.id}}" hx-swap="outerHTML" class="px-2 py-1 hover:text-red-500 text-zinc-500 text-xs touch-manipulation">-</button>
                             <span class="text-[10px] font-mono w-4 text-center">{{ item.qty }}</span>
