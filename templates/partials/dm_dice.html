@@ -22,7 +22,7 @@
 
     <div class="grid grid-cols-4 gap-1 z-10">
         {% for die in ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] %}
-        <button hx-post="/gamestate/roll_dm/{{die}}" hx-target="#dm-dice-panel" hx-swap="outerHTML"
+        <button hx-post="{{ url_for('roll_dm_die', die=die) }}" hx-target="#dm-dice-panel" hx-swap="outerHTML"
                 class="bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 text-[9px] font-bold py-1 uppercase transition-all hover:border-red-900 focus:bg-red-900/20">
             {{die}}
         </button>
