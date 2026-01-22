@@ -11,23 +11,20 @@
         body { background-color: #09090b; color: #e4e4e7; font-family: 'Courier New', Courier, monospace; }
         .neon-red { box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
         dialog::backdrop { background: rgba(0, 0, 0, 0.9); }
-        /* Esconde scrollbar mas permite scroll */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Ajustes para toque */
         button { touch-action: manipulation; }
     </style>
 </head>
 <body class="p-2 md:p-6 min-h-screen selection:bg-red-900 selection:text-white pb-24 md:pb-20">
 
-    <header class="max-w-7xl mx-auto mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4">
+    <header class="max-w-[1920px] mx-auto mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4">
         
         <div class="lg:col-span-3 flex flex-row md:flex-col justify-between items-center md:items-stretch bg-zinc-950 border-l-4 border-red-600 p-4 shadow-lg">
             <div>
                 <h1 class="text-2xl md:text-3xl font-black text-red-600 italic tracking-tighter flex items-center gap-2">
                     <i data-lucide="radiation" class="animate-pulse w-6 h-6 md:w-8 md:h-8"></i> 
-                    <span>ZONA VERMELHA<span class="hidden md:inline"></span></span>
+                    <span>ZONA<span class="hidden md:inline"> VERMELHA</span></span>
                 </h1>
                 <p class="text-zinc-600 text-[10px] tracking-[0.3em] uppercase mt-1">TEMPORADA I</p>
             </div>
@@ -75,7 +72,7 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6" id="player-grid">
+    <main class="max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4 md:gap-6" id="player-grid">
         {% for player in players %}
             {% include 'partials/player_card.html' %}
         {% endfor %}
@@ -143,7 +140,6 @@
     <script>
         lucide.createIcons();
         document.body.addEventListener('htmx:afterSwap', () => lucide.createIcons());
-        // (Scripts de validação mantidos - não mudam)
         function updatePoints() {
             const inputs = document.querySelectorAll('.attr-input');
             let sum = 0; inputs.forEach(i => sum += parseInt(i.value || 0));
